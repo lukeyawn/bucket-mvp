@@ -1,0 +1,232 @@
+[
+  {
+    "id": "maya",
+    "name": "Maya",
+    "rankings": [
+      {
+        "tier": "local",
+        "groups": {
+          "loved": [
+            "barton-springs-pool",
+            "deep-eddy-pool",
+            "mount-bonnell",
+            "zilker-hillside-theater",
+            "congress-bridge-bats",
+            "hi-how-are-you-mural"
+          ],
+          "okay": [
+            "sculpture-falls",
+            "bull-creek-district-park",
+            "treaty-oak",
+            "zilker-moonlight-tower",
+            "twin-falls"
+          ],
+          "disliked": [
+            "greetings-from-austin-mural",
+            "lou-neff-point"
+          ]
+        }
+      },
+      {
+        "tier": "state",
+        "groups": {
+          "loved": [
+            "texas-state-capitol",
+            "enchanted-rock"
+          ],
+          "okay": [],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "legendary",
+        "groups": {
+          "loved": [],
+          "okay": [],
+          "disliked": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "jordan",
+    "name": "Jordan",
+    "rankings": [
+      {
+        "tier": "local",
+        "groups": {
+          "loved": [
+            "deep-eddy-pool",
+            "sculpture-falls",
+            "lou-neff-point",
+            "capital-factory"
+          ],
+          "okay": [
+            "hi-how-are-you-mural",
+            "hartman-prehistoric-garden",
+            "zilker-hillside-theater",
+            "zilker-moonlight-tower",
+            "greetings-from-austin-mural"
+          ],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "state",
+        "groups": {
+          "loved": [
+            "texas-state-capitol",
+            "enchanted-rock"
+          ],
+          "okay": [
+            "mckinney-falls"
+          ],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "legendary",
+        "groups": {
+          "loved": [
+            "grand-canyon-mather-point",
+            "old-faithful"
+          ],
+          "okay": [],
+          "disliked": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "priya",
+    "name": "Priya",
+    "rankings": [
+      {
+        "tier": "local",
+        "groups": {
+          "loved": [
+            "pennybacker-bridge-overlook",
+            "barton-springs-pool",
+            "zilker-hillside-theater",
+            "congress-bridge-bats",
+            "sculpture-falls"
+          ],
+          "okay": [
+            "lou-neff-point"
+          ],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "state",
+        "groups": {
+          "loved": [
+            "texas-state-capitol",
+            "enchanted-rock"
+          ],
+          "okay": [],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "legendary",
+        "groups": {
+          "loved": [],
+          "okay": [],
+          "disliked": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "sam",
+    "name": "Sam",
+    "rankings": [
+      {
+        "tier": "local",
+        "groups": {
+          "loved": [
+            "congress-bridge-bats",
+            "deep-eddy-pool"
+          ],
+          "okay": [
+            "zilker-hillside-theater",
+            "bull-creek-district-park",
+            "barton-springs-pool"
+          ],
+          "disliked": [
+            "greetings-from-austin-mural"
+          ]
+        }
+      },
+      {
+        "tier": "state",
+        "groups": {
+          "loved": [
+            "enchanted-rock",
+            "texas-state-capitol",
+            "mckinney-falls"
+          ],
+          "okay": [],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "legendary",
+        "groups": {
+          "loved": [],
+          "okay": [],
+          "disliked": []
+        }
+      }
+    ]
+  },
+  {
+    "id": "diego",
+    "name": "Diego",
+    "rankings": [
+      {
+        "tier": "local",
+        "groups": {
+          "loved": [
+            "mount-bonnell",
+            "congress-bridge-bats"
+          ],
+          "okay": [
+            "bull-creek-district-park",
+            "treaty-oak",
+            "hartman-prehistoric-garden",
+            "capital-factory"
+          ],
+          "disliked": [
+            "lou-neff-point"
+          ]
+        }
+      },
+      {
+        "tier": "state",
+        "groups": {
+          "loved": [
+            "texas-state-capitol"
+          ],
+          "okay": [
+            "mckinney-falls"
+          ],
+          "disliked": []
+        }
+      },
+      {
+        "tier": "legendary",
+        "groups": {
+          "loved": [
+            "grand-canyon-mather-point",
+            "yosemite-tunnel-view",
+            "old-faithful"
+          ],
+          "okay": [],
+          "disliked": []
+        }
+      }
+    ]
+  }
+]

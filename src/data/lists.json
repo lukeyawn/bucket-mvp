@@ -1,0 +1,23 @@
+[
+  {
+    "id": "zilker-park",
+    "name": "Zilker Park",
+    "description": "Austin's big backyard, one spot at a time.",
+    "kind": "destination",
+    "placeIds": ["barton-springs-pool", "hartman-prehistoric-garden", "zilker-hillside-theater", "lou-neff-point", "austin-nature-science-center", "zilker-moonlight-tower"]
+  },
+  {
+    "id": "austin-swimming-holes",
+    "name": "Austin Swimming Holes",
+    "description": "Cold water for hot days, from spring-fed pools to greenbelt falls.",
+    "kind": "themed",
+    "placeIds": ["barton-springs-pool", "deep-eddy-pool", "sculpture-falls", "twin-falls", "bull-creek-district-park"]
+  },
+  {
+    "id": "only-in-austin",
+    "name": "Only in Austin",
+    "description": "Murals, bats, old trees, and other things you won't find anywhere else.",
+    "kind": "themed",
+    "placeIds": ["hi-how-are-you-mural", "greetings-from-austin-mural", "treaty-oak", "congress-bridge-bats", "zilker-moonlight-tower", "capital-factory"]
+  }
+]

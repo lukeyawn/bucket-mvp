@@ -1,0 +1,154 @@
+{
+  "collections": [
+    {
+      "placeId": "barton-springs-pool",
+      "collectedAt": "2026-08-02T17:12:00.000Z",
+      "photoKey": null,
+      "lat": 30.2638447,
+      "lng": -97.7701429,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "texas-state-capitol",
+      "collectedAt": "2026-08-09T01:40:00.000Z",
+      "photoKey": null,
+      "lat": 30.2746912,
+      "lng": -97.7405171,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "greetings-from-austin-mural",
+      "collectedAt": "2026-08-16T00:55:00.000Z",
+      "photoKey": null,
+      "lat": 30.247583,
+      "lng": -97.755943,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "congress-bridge-bats",
+      "collectedAt": "2026-08-23T16:20:00.000Z",
+      "photoKey": null,
+      "lat": 30.2601627,
+      "lng": -97.7455262,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "deep-eddy-pool",
+      "collectedAt": "2026-08-30T19:05:00.000Z",
+      "photoKey": null,
+      "lat": 30.2765211,
+      "lng": -97.7732044,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "twin-falls",
+      "collectedAt": "2026-09-06T14:30:00.000Z",
+      "photoKey": null,
+      "lat": 30.2489408,
+      "lng": -97.8130022,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "mount-bonnell",
+      "collectedAt": "2026-09-13T23:45:00.000Z",
+      "photoKey": null,
+      "lat": 30.3207674,
+      "lng": -97.7733474,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "zilker-hillside-theater",
+      "collectedAt": "2026-09-20T02:10:00.000Z",
+      "photoKey": null,
+      "lat": 30.2644135,
+      "lng": -97.772445,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "treaty-oak",
+      "collectedAt": "2026-09-27T15:00:00.000Z",
+      "photoKey": null,
+      "lat": 30.2714658,
+      "lng": -97.7554622,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "umlauf-sculpture-garden",
+      "collectedAt": "2026-10-04T18:25:00.000Z",
+      "photoKey": null,
+      "lat": 30.263044,
+      "lng": -97.7662416,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "lou-neff-point",
+      "collectedAt": "2026-10-08T16:40:00.000Z",
+      "photoKey": null,
+      "lat": 30.2672127,
+      "lng": -97.7617556,
+      "accuracyM": 0,
+      "source": "demo"
+    },
+    {
+      "placeId": "zilker-moonlight-tower",
+      "collectedAt": "2026-10-11T20:15:00.000Z",
+      "photoKey": null,
+      "lat": 30.2663871,
+      "lng": -97.7711915,
+      "accuracyM": 0,
+      "source": "demo"
+    }
+  ],
+  "rankings": [
+    {
+      "tier": "local",
+      "groups": {
+        "loved": [
+          "barton-springs-pool",
+          "congress-bridge-bats",
+          "mount-bonnell",
+          "deep-eddy-pool",
+          "treaty-oak",
+          "lou-neff-point",
+          "zilker-moonlight-tower"
+        ],
+        "okay": [
+          "zilker-hillside-theater",
+          "greetings-from-austin-mural"
+        ],
+        "disliked": [
+          "twin-falls",
+          "umlauf-sculpture-garden"
+        ]
+      }
+    },
+    {
+      "tier": "state",
+      "groups": {
+        "loved": [
+          "texas-state-capitol"
+        ],
+        "okay": [],
+        "disliked": []
+      }
+    },
+    {
+      "tier": "legendary",
+      "groups": {
+        "loved": [],
+        "okay": [],
+        "disliked": []
+      }
+    }
+  ]
+}

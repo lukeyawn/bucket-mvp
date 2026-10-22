@@ -22,7 +22,7 @@ These come from the Pitch 4 submission. Goals 1 and 3 have been refined since th
 
 | # | Goal | How it's verified |
 |---|---|---|
-| 1 | A user can collect a place only when their device location is within that place's collection radius (default 100 m) and they have taken a photo. | Unit tests on the distance gate, plus one real collect at Capital Factory in the laptop browser. |
+| 1 | A user can collect a place only when their device location is within that place's collection radius (default 100 m, plus an allowance of half the reported accuracy, which must be 75 m or better) and they have taken a photo. | Unit tests on the distance gate, plus one real collect at Capital Factory in the laptop browser. |
 | 2 | Ranking a new place into a tier group with up to 15 ranked places takes no more than 4 comparisons after the initial loved / okay / didn't-like choice. | Unit test that inserts into every position of groups sized 0 to 15 and counts comparisons. |
 | 3 | Each place page displays the user's own rank and the average score among friends who have collected it. | Unit tests on score math, plus a manual check on a place with seeded friend data. |
 
@@ -33,7 +33,7 @@ These come from the Pitch 4 submission. Goals 1 and 3 have been refined since th
 ### Demo 4 (build by Friday, October 16)
 
 - Runs locally in a laptop browser on `localhost`, laid out as a phone-width app. No hosting.
-- Map of hand-seeded places with your location shown, filterable by tier (one at a time) and by collected / not collected. Every pin shows friends' average score.
+- Map of hand-seeded places with your location shown, filterable by tier (one at a time) and by collected / not collected. Every pin a friend has collected shows friends' average score.
 - Collect flow: location check against the place's radius, then a photo from the webcam
 - Simulated-location mode for demoing places you can't physically visit, with a visible banner. Library photos are allowed in this mode.
 - Ranking flow: loved / okay / didn't like, then binary-insertion comparisons within that tier
@@ -47,7 +47,7 @@ These come from the Pitch 4 submission. Goals 1 and 3 have been refined since th
 ### Out of scope for Demo 4
 
 - Native iOS (Cycle 5)
-- Hosting, phone browsers, and HTTPS setup
+- Hosting and phone browsers (kept only as a fallback for the real collect; see section 8)
 - Splash physics (stretch goal; the Demo 4 bucket uses a simple animated fill)
 - Shaped Legendary trophies, metal finishes, the profile trophy shelf (Cycle 5)
 - Ranking destinations such as Yellowstone vs. Arches (Cycle 5)
@@ -69,16 +69,18 @@ These rules decide what goes into the seed data and which tier it gets. Write ne
 
 **A collectible place is somewhere specific you can stand and take a photo.** Barton Springs Pool is a place. Zilker Park, at 350 acres, is not; it becomes a list of spots inside it. Small parks that are effectively one spot (a pocket park, a single overlook) can stay a single place.
 
-Each place has its own **collection radius**. Use 100 m by default, smaller for a mural or statue, larger for a big pool or a viewpoint area. The minimum is 40 m, because location readings are rarely more precise than that.
+**It must be legal and reasonably safe to visit.** Only include places with public access: no private land, no closed swimming holes, no caves or ledges that require climbing past signs. Check current access before adding a place, since a collecting game sends people there.
+
+Each place has its own **collection radius**. Use 100 m by default, smaller for a mural or statue, larger for a big pool or a viewpoint area. The minimum is 40 m, because location readings are rarely more precise than that; the collect check adds an allowance for location error on top of the radius (section 8).
 
 ### Tiers
 
-Tiers describe **how famous a place is**, not who manages it or where it is.
+Tiers mostly describe **how famous a place is**. State designations are a useful shortcut for State Treasure, since fame alone makes Local and State hard to tell apart. National designations are not a shortcut for Legendary; only the tests below decide that.
 
 | Tier | Definition | Examples |
 |---|---|---|
 | **Local** | Known mainly to people who are there. | Mount Bonnell, a mural, a swimming hole, the cave on Mount Bonnell |
-| **State Treasure** | Associated with the state (state parks, the capitol, the state fair) or instantly recognizable as part of that state. | Texas State Capitol, Enchanted Rock, the Golden Gate Bridge |
+| **State Treasure** | Has a state designation (state parks and natural areas, the capitol, the state fair) or is instantly recognizable as part of that state. | Texas State Capitol, Enchanted Rock, Palo Duro Canyon |
 | **Legendary** | Recognizable across the country or the world; a place people plan a trip around. | Old Faithful, the Grand Canyon, the Statue of Liberty |
 
 Rules for Legendary:
@@ -101,7 +103,7 @@ Keep curated lists to about 5–15 places so each collect visibly fills the buck
 
 ## 4. Core user flow
 
-1. **Browse:** open the app to a map of nearby places, with your location shown. Every pin shows your friends' average score. Filter by tier or by collected status.
+1. **Browse:** open the app to a map of nearby places, with your location shown. Pins your friends have collected show their average score. Filter by tier or by collected status.
 2. **Choose:** tap a pin to see the place, your rank if you've collected it, and your friends' average score.
 3. **Collect:** at the place, tap Collect. The app checks your location, then you take a photo.
 4. **Fill:** the place drops into its buckets. One bucket plays the fill animation (see "Which bucket animates" in section 5); others show as small chips ("+1 Austin Views · 4/8").
@@ -135,7 +137,7 @@ Bottom navigation with four tabs: **Map**, **Buckets**, **Rankings**, **Profile*
 ### Collect flow
 1. **Locating:** spinner while getting a fresh position. (Location permission was already requested at launch.)
 2. **Too far:** "You're 2.3 km from Mount Bonnell. Get within 100 m to collect." with a retry button.
-3. **Weak signal:** if reported accuracy is worse than 75 m, "Location signal is weak. Try again in a moment."
+3. **Weak signal:** if reported accuracy is worse than 75 m, "Your location is only accurate to 120 m; collecting needs 75 m or better. Move near a window, make sure Wi-Fi is on, and try again." (Waiting alone rarely helps on a laptop, since its location comes from Wi-Fi.)
 4. **Approximate only:** if accuracy is worse than 1 km, "Your location is only approximate. Turn on Wi-Fi and location services, then try again."
 5. **Blocked or failed:** "Location is blocked for this site. Allow it in your browser's site settings to collect." or, on timeout, "Couldn't get your location. Try again."
 6. **In range:** the in-app camera opens (live webcam preview with a shutter button). In simulated mode, a "Choose from library" option also appears.
@@ -203,9 +205,9 @@ interface Collection {
   placeId: string;
   collectedAt: string;   // ISO timestamp
   photoKey: string | null; // key of the photo blob in IndexedDB; null for demo-profile collections
-  lat: number;           // where the device was when collected
-  lng: number;
-  accuracyM: number;
+  lat: number;           // where the device was when collected; the place's own
+  lng: number;           //   coordinates for simulated and demo collections
+  accuracyM: number;     // 0 for simulated and demo collections
   source: CollectionSource; // live, simulated-location mode, or seeded demo profile
 }
 
@@ -230,7 +232,9 @@ interface Settings {
 
 **Seeded friends:** generate 4–5 friends with a small seed script using a fixed random seed, so their rankings stay consistent across reloads and cover most seeded places. Each friend should have collected a different subset, so friend counts vary from place to place.
 
-**Demo profile:** `src/data/demoProfile.json` holds about 12 collections (`source: 'demo'`) and their rankings: 7 places in Loved Local, so ranking a new loved Local place takes exactly 3 comparisons; 2–3 each in Okay and Didn't like; and one State Treasure. It excludes Capital Factory and any other place planned for a live collect. Loading it replaces the current collections, rankings, and photos.
+Don't give friends independent random rankings: averages of 3–4 random scores all land near 5, so every pin would read 4–6 and the map would recommend nothing. Instead, give each seeded place a hidden quality value (hand-set, 0–10) in the script, and have each friend's sentiment and order follow that value plus some noise. Averages then spread out, and well-loved places look well loved.
+
+**Demo profile:** `src/data/demoProfile.json` holds about 12 collections (`source: 'demo'`) and their rankings: 7 places in Loved Local, so ranking a new loved Local place takes exactly 3 comparisons; 2–3 each in Okay and Didn't like; and one State Treasure. It excludes Capital Factory, the backup live-collect place (section 11), and any other place planned for a live collect. Loading it replaces the current collections, rankings, and photos.
 
 ---
 
@@ -280,6 +284,8 @@ score = hi - (hi - lo) * i / max(m - 1, 1)     // rounded to 1 decimal
 
 A group of one scores the top of its band.
 
+Known limits: a score still depends somewhat on group size (the worst of 2 loved places and the worst of 30 both score 6.7), and inserting a place shifts the scores of everything below it in that group. That's acceptable for averaging across friends, but don't present scores as precise.
+
 **Friends' average** for a place is the mean score across friends who have ranked it, shown with the count ("8.4 from 3 friends").
 
 ---
@@ -296,23 +302,33 @@ collectCheck(place, pos):
   if d - pos.accuracy > place.radiusM: return tooFar(d)   // too far even in the best case
   if pos.accuracy > 1000:              return approximate
   if pos.accuracy > 75:                return weakSignal
-  if d <= place.radiusM:               return ok
+  if d <= place.radiusM + pos.accuracy / 2: return ok
   return tooFar(d)
 ```
 
-- Collect is only ever allowed when distance ≤ `place.radiusM` **and** reported accuracy ≤ 75 m.
+- Collect is only ever allowed when distance ≤ `place.radiusM` + half the reported accuracy **and** reported accuracy ≤ 75 m.
+- **Why the allowance:** a reading can be off by up to its accuracy in any direction. Requiring the raw reading inside a 40 m radius would often reject someone standing right at the spot when accuracy is 40–75 m. Allowing the full accuracy would let a 40 m mural be collected from 115 m away. Half the accuracy is the compromise.
 - Store the device position, accuracy, and `source` on the collection, so simulated and demo collections can always be told apart from live ones.
 
 ### Running on a laptop
 
-In a laptop browser, location comes from nearby Wi-Fi networks rather than GPS, usually accurate to 20–100 m in a dense area like downtown. Check the reported accuracy at Capital Factory as early as possible. If it is often worse than 75 m there, adjust the threshold before Friday rather than faking the collect. On Windows, Chrome only gets a location when Windows location services are on.
+In a laptop browser, location comes from nearby Wi-Fi networks rather than GPS, usually accurate to 20–100 m in a dense area like downtown. On Windows, Chrome only gets a location when Windows location services are on.
+
+**Check accuracy at Capital Factory on Thursday.** This is required, not optional: the real collect and the video are both on Friday afternoon, so there's no time to recover from a surprise then. Open the app there, tap Collect a few times, and note the reported accuracy.
+
+**If accuracy there is often worse than 75 m, use the phone fallback** rather than faking the collect or loosening the threshold a lot:
+1. Deploy the build to Vercel or Netlify. Both serve HTTPS automatically, so the phone browser allows camera and location.
+2. Do the real collect at Capital Factory on the phone, using GPS, and screen-record it for the demo video.
+3. Disclose that this one step was shown on a phone.
+
+The webcam capture screen uses `getUserMedia`, which also works in phone browsers, so no extra code is needed.
 
 ### Simulated-location mode
 
 You can't stand at a dozen places for a demo recording, so the prototype has a simulated-location mode:
 - Toggled in Profile → Settings.
 - While on, a **persistent banner** across the top of every screen reads "Simulated location" in a contrasting color. The demo guide requires disclosing mocked behavior, and the banner makes that visible on screen.
-- In this mode, the location check uses the place's own coordinates (as if you were standing there) and records `source: 'simulated'`.
+- In this mode, the location check uses a position at the place's own coordinates with accuracy 0 (as if you were standing there with perfect signal) and records `source: 'simulated'`.
 - The photo can come from the camera or the photo library.
 
 **For the demo,** collect Capital Factory for real, with simulation off, to show goal 1 working end to end.
@@ -392,16 +408,17 @@ tests/
 
 ## 11. Seed data
 
-**Target for Demo 4:** about 30–50 places.
-- Mostly **Austin Local** places, including real hidden gems, such as the cave on Mount Bonnell.
-- **Capital Factory** as a Local place, in at least one list, so the live collect fills a bucket on screen.
+**Target for Demo 4:** about 20 places. Each one needs coordinates checked against a map source, which takes longer than it sounds. Grow toward 30–50 after Demo 4.
+- Mostly **Austin Local** places, including real hidden gems, such as the cave on Mount Bonnell (confirm it's publicly accessible).
+- **Capital Factory** as a Local place, in at least one list, so the live collect fills a bucket on screen. It doesn't really meet the curation rules (it's a coworking hub, not a hidden gem); it's included only for the demo.
+- **One backup live-collect place** that you can easily reach (for example, near campus or home), in at least one list, in case the Capital Factory collect falls through.
 - A handful of **State Treasures** (for example, the Texas State Capitol, Enchanted Rock).
 - **3–4 Legendary** places across the US, each using one classic spot (for example, Old Faithful itself, a named Grand Canyon viewpoint).
 - **2–3 curated Austin lists** of 5–15 places each, at least one of them a destination list (for example, "Zilker Park").
 
 **Coordinates:** take them from a map source (OpenStreetMap, Wikipedia, or a right-click in Google Maps), never from memory or a guess; a wrong pin breaks the location check. Verify Capital Factory's pin on site, since it's the one real collect.
 
-Example entry format (coordinates intentionally left as placeholders):
+Example entry format (coordinates intentionally left as placeholders):c
 
 ```json
 {
@@ -436,11 +453,12 @@ AI tends to fall back on a generic look. These decisions exist so the build foll
 | `surface` | `#FFFFFF` | Cards, sheets |
 | `ink` | `#1D2731` | Primary text |
 | `ink-muted` | `#5E6B76` | Secondary text |
-| `water` | `#2E86DE` | Bucket water, primary buttons |
-| `water-deep` | `#1F5FA8` | Water depth gradient, pressed states |
+| `water` | `#2E86DE` | Bucket water, links |
+| `water-deep` | `#1F5FA8` | Water depth gradient, primary buttons with white text (about 6.4:1; white on `water` is only about 3.8:1, below the 4.5:1 AA minimum) |
+| `water-pressed` | `#184C87` | Pressed primary buttons |
 | `tier-local` | `#2E86DE` | Local pins (circle) |
-| `tier-state` | `#C8962E` | State Treasure pins (shield) |
-| `tier-legendary` | white star with an `ink` outline; collected adds a pale pastel ring (`#F4D9F5` → `#D9F0F7` → `#F7F0D2`) | Legendary pins (star) |
+| `tier-state` | `#A87A1F` | State Treasure pins (shield). Darkened from `#C8962E`, which was only about 2.7:1 on white, below the 3:1 minimum for UI graphics. |
+| `tier-legendary` | `ink` star; collected adds a pale pastel ring (`#F4D9F5` → `#D9F0F7` → `#F7F0D2`) | Legendary pins (star) |
 | `sim-banner` | `#F2B705` background, `#1D2731` text | Simulated-location banner |
 | Radius | 14 px cards, fully rounded chips | |
 | Spacing | 4 px scale (4, 8, 12, 16, 24, 32) | |
@@ -449,15 +467,15 @@ AI tends to fall back on a generic look. These decisions exist so the build foll
 
 ### Pins
 - Shape encodes tier: **circle** = Local, **shield** = State Treasure, **star** = Legendary.
-- **Collected** = filled. **Not collected** = white fill with a colored outline (an `ink` outline for Legendary, which would otherwise disappear on the light map).
+- **Collected** = filled with the tier color (an `ink`-filled star with the pastel ring for Legendary). **Not collected** = white fill with a colored outline (an `ink` outline for Legendary). A pale ring alone would be too subtle on the light map to tell collected Legendary places apart.
 - **Score label:** a small pill beneath the pin (`surface` background, `ink` text, about 12 px) showing friends' average. No pill when no friend has collected the place.
-- Clustering at low zoom is a stretch goal; 30–50 pins spread across Austin should be readable without it.
+- Clustering at low zoom is a stretch goal; 20–50 pins spread across Austin should be readable without it.
 
 ### Bucket fill (Demo 4)
 - An SVG bucket (tapered body with a handle). Water is a shape clipped to the bucket's interior, with a gently moving surface wave.
 - When a collect raises the level, animate over about 900 ms with a slight overshoot and settle, so the water sloshes.
 - **Stretch goal:** a drop falls in and causes a splash. The standard technique is a row of about 30 springs along the water surface, each pulled back to rest and spreading its motion to neighbors. Starting values to tune: tension 0.025, damping 0.025, spread 0.25.
-- With the **reduce motion** setting on, skip the wave and splash and just show the new level.
+- When the operating system's **reduce motion** setting is on (`prefers-reduced-motion`), skip the wave and splash and just show the new level.
 
 ### Avoid
 - Emoji as icons
@@ -477,7 +495,7 @@ AI tends to fall back on a generic look. These decisions exist so the build foll
 ### Automated (Vitest)
 - **Ranking:** for every group size from 0 to 15 and every possible final position, simulate the answers and assert the comparison count is ≤ 4 and the place lands in the right position. Test "too tough to call," undo, and undo back to the sentiment choice.
 - **Scores:** band edges, a group of one, rounding, friends' average with 0, 1, and several friends.
-- **Geo:** haversine against known distances. The collect check passes at exactly the radius with good accuracy and fails just beyond it; never passes when accuracy exceeds 75 m; reports too far rather than weak signal when distance − accuracy > radius; reports approximate when accuracy exceeds 1 km; simulated mode passes.
+- **Geo:** haversine against known distances. The collect check passes at exactly radius + accuracy / 2 and fails just beyond it; never passes when accuracy exceeds 75 m; reports too far rather than weak signal when distance − accuracy > radius; reports approximate when accuracy exceeds 1 km; simulated mode passes.
 
 ### Manual checklist (laptop Chrome)
 - [ ] App loads at `localhost` with the phone-width layout
@@ -503,12 +521,14 @@ AI tends to fall back on a generic look. These decisions exist so the build foll
 
 | When | Work |
 |---|---|
-| **Wed evening** | Scaffold the app (Vite, routing, store). Write seed data, including Capital Factory. Map with tier-styled pins, score labels, filters, the location dot, and the place bottom sheet. |
-| **Thu** | Collect flow (location check, simulated mode, webcam capture, library picker, photo storage). Ranking flow and its tests. Score math and the friend seed script. Place page and Rankings screen. If you're at Capital Factory, check the laptop's location accuracy there. |
+| **Wed evening** | Scaffold the app (Vite, routing, store). Write seed data (about 20 places, including Capital Factory and the backup place). Map with tier-styled pins, the location dot, and the place bottom sheet. |
+| **Thu** | Collect flow (location check, simulated mode, webcam capture, library picker, photo storage). Ranking flow and its tests. Score math and the friend seed script, then score labels and filters on the map. Place page and Rankings screen. **Go to Capital Factory and check the laptop's location accuracy** (required; see section 8). |
 | **Fri morning** | Buckets and list screens with the fill animation. Profile, settings, and the demo profile. Run the manual checklist. |
 | **Fri afternoon** | Fix what the checklist finds. Do the real collect at Capital Factory. Record the demo video. Write the Demo 4 submission. |
 
-**If time runs short, cut in this order:** splash physics → profile photo grid → list screen details → "too tough to call." Never cut the location check, the ranking flow, or friends' averages; those are the three goals.
+Splash physics is a stretch goal and isn't scheduled at all.
+
+**If time runs short, cut in this order:** completed-bucket shimmer → the "which bucket animates" priority rule (animate the first affected list) → status filter → profile photo grid → empty-state copy → list screen details → "too tough to call." Never cut the location check, the ranking flow, or friends' averages; those are the three goals.
 
 ### Demo video (3–5 minutes)
 - **Before recording:** load the demo profile.
@@ -523,6 +543,8 @@ AI tends to fall back on a generic look. These decisions exist so the build foll
 - The app runs locally in a laptop browser, laid out like a phone; it isn't hosted or running on a phone.
 - All data, including photos, is stored only in the browser; there are no accounts or server.
 - Places and lists are hand-curated; there is no user submission.
+- Capital Factory is included as a Local place only so the live collect can happen during the demo.
+- If the phone fallback was used (section 8), the real collect was shown on a phone.
 
 Keep this list updated during the build; it becomes section C of the Demo 4 written submission.
 
@@ -532,11 +554,19 @@ Keep this list updated during the build; it becomes section C of the Demo 4 writ
 
 Section E of the Demo submission asks for iterations in Before / Learning / Change / Result form. These are the design decisions made since Pitch 4. Add build-time iterations as they happen.
 
+So far, every "Learning" here comes from design reasoning rather than from watching someone use the app. If anyone tries the prototype before the submission, even for five minutes, log what they did and said; one learning from a real user is worth more than several from reasoning.
+
 **1. Collection radius**
 - **Before:** a fixed 100 m radius for every place.
 - **Learning:** places vary hugely in size. 100 m is too tight for a large pool and too loose for a mural.
 - **Change:** each place has its own radius, defaulting to 100 m.
 - **Result:** the location check matches the real size of each place.
+
+**1b. Location error allowance**
+- **Before:** collect only when the raw reading is inside the radius.
+- **Learning:** readings are off by up to their reported accuracy (often 40–75 m), so someone standing at a small place like a mural would often be rejected.
+- **Change:** allow half the reported accuracy on top of the radius, and still require accuracy of 75 m or better.
+- **Result:** small places stay collectable without letting people collect from far away.
 
 **2. Tiers**
 - **Before:** Legendary / Landmark / Local, loosely based on notability.
@@ -566,12 +596,12 @@ Section E of the Demo submission asks for iterations in Before / Learning / Chan
 - **Before:** goal 3 said friends' "average rank."
 - **Learning:** rank positions can't be averaged across friends with different list sizes.
 - **Change:** each ranked place also gets a 0–10 score from its sentiment band and position; friends' average uses scores.
-- **Result:** a comparable number, and goal 3 is refined accordingly.
+- **Result:** a number that can be averaged across friends (it still depends somewhat on group size; see section 7), and goal 3 is refined accordingly.
 
 **7. Friends' scores on the map**
 - **Before:** friends' average appeared only in a place's bottom sheet and page.
 - **Learning:** deciding where to go next means comparing places at a glance, which opening one place at a time doesn't allow.
-- **Change:** every pin shows friends' average score.
+- **Change:** every pin a friend has collected shows friends' average score.
 - **Result:** the map doubles as a set of recommendations.
 
 **8. Demo profile**
@@ -582,13 +612,21 @@ Section E of the Demo submission asks for iterations in Before / Learning / Chan
 
 **9. Platform for the demo**
 - **Before:** a mobile web app hosted on Netlify or Vercel and tested on a phone.
-- **Learning:** phone browsers only allow camera and location on HTTPS pages, and the demo is shown from a laptop on a TV.
-- **Change:** run locally in the laptop browser on `localhost`, laid out as a phone-width app, with a webcam capture screen.
-- **Result:** no hosting or certificate setup, while location and camera stay real.
+- **Learning:** the demo is shown from a laptop on a TV, and testing every change on a phone adds a deploy step to each iteration. (Hosting itself isn't the obstacle: Netlify and Vercel serve HTTPS automatically, which phone browsers require for camera and location.)
+- **Change:** run locally in the laptop browser on `localhost`, laid out as a phone-width app, with a webcam capture screen. Keep a hosted build as the fallback for the real collect.
+- **Result:** a faster build loop with location and camera still real. The tradeoff is laptop Wi-Fi positioning (20–100 m) instead of phone GPS, which is why the Capital Factory accuracy check matters (section 8).
 
 ---
 
 ## 16. Cycle 5 roadmap (October 23 – November 13)
+
+Everything below is more than three weeks of work. Default priorities:
+1. **Native iOS port** of the Demo 4 features. If the Mac hasn't arrived by October 23, keep building on the web prototype instead.
+2. **Trophies and finishes**, the Demo Day showpiece. Start with the fallback (regular buckets on the shelf).
+3. **Destination ranking**, if time allows.
+4. **Real accounts, backend, and user submissions** come after Demo Day, unless customer discovery shows friends' rankings are the main draw.
+
+Revisit this order after the customer discovery memo (October 30), before committing most of the cycle.
 
 ### Platform
 - **Native iOS in SwiftUI** once the Mac arrives. Better shimmer and physics tools, free Apple Maps in native apps, and simulated locations in Xcode's simulator. The data model, ranking algorithm, seed data, and this doc carry over; the web interface code does not.
@@ -626,7 +664,7 @@ Demo 4's priority rule (section 5) carries over. In addition, a Legendary trophy
 
 - **Name:** an existing social bucket-list app is already called "Bucket." Fine for class; revisit before any public launch.
 - **"Local" label:** reads oddly for a lesser-known trail in Yellowstone. Keep it defined as "known mainly to people who are there," or rename (for example, "Gem").
-- **Golden Gate Bridge** and similar borderline cases: apply the symbol test and record the decision.
+- **Golden Gate Bridge** and similar borderline cases between State Treasure and Legendary: apply the trip test and symbol test, and record the decision.
 - **Effort vs. prestige:** completing a 10-place list (silver) takes more effort than one visit to a State Treasure (gold). Acceptable if metals mean fame and list completion gets its own overflow celebration; revisit after user feedback.
 - **Collecting with a library photo's location (deferred):** should a photo taken on an earlier visit, with an embedded location inside the radius, count as a genuine collect? If so, should it have an age limit? Note that iOS Safari often strips location from photos picked in a web page; native iOS can read it with permission.
-- **Laptop location accuracy at Capital Factory:** unverified until checked on site (section 8).
+- **Laptop location accuracy at Capital Factory:** unverified until the required Thursday check on site. If it's poor, use the phone fallback (section 8).
